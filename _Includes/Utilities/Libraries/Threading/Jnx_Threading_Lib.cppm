@@ -1,5 +1,7 @@
 #pragma once
 export module JNX_Threading_Lib;
+import <utility>;
+import <vector>;
 
 #ifdef _DLLEXPO
 #define DLLFLOW __declspec(dllexport)
@@ -8,7 +10,7 @@ export module JNX_Threading_Lib;
 #endif
 
 export namespace JNX {
-	enum memory_order {
+	typedef enum memory_order {
 		memory_order_relaxed,
 		memory_order_consume,
 		memory_order_acquire,
@@ -18,16 +20,19 @@ export namespace JNX {
 	};
 
 	enum JOBTYPES : char {
-		EXIT = 1 << 0, // 0001
-		JOB = 1 << 1, // 0010
+		// Is exit really necessary?
+		EXIT  = 1 << 0, // 0001
+		JOB   = 1 << 1, // 0010
 		FENCE = 1 << 2  // 0100
 	};
-	extern "C" {
+
+	extern "C++" {
 		struct DLLFLOW IThreadEngine {
+			virtual bool QueueJob(memory_order&& mem_order, bool*&& functionPointer, unsigned int argumentCount, ...) = 0;
 			virtual void test() = 0;
 		};
 
-		DLLFLOW IThreadEngine& CreateThreadEngine(unsigned int);
-		typedef IThreadEngine& (__cdecl* CREATETE)(unsigned int);
+		DLLFLOW IThreadEngine& CreateThreadEngine(const unsigned int);
+		typedef IThreadEngine& (__cdecl* CREATETE)(const unsigned int);
 	}
 }
